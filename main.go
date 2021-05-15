@@ -128,6 +128,7 @@ func flushCache(c *cache) error {
 		log.Error().Msgf("cannot create csv %s: %s", filePath, err.Error())
 		return err
 	}
+	log.Info().Str("path", filePath).Str("t", c.records[0].t).Msgf("write file %s", filePath)
 	defer f.Close()
 	writer := csv.NewWriter(f)
 	if err = writer.Write(keys); err != nil {
@@ -179,17 +180,20 @@ type ErrorMessage struct {
 }
 
 func (s *server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
-	log.Info().Str("uri", req.RequestURI).Msgf("receive %s", req.RequestURI)
 
 	clientID, clientSecret, ok := req.BasicAuth()
 	if !ok {
+		log.Info().Str("uri", req.RequestURI).Msgf("401 unauthorized %s", req.RequestURI)
 		res.WriteHeader(401)
 		return
 	}
 	if clientID != s.clientID || clientSecret != s.clientSecret {
+		log.Info().Str("uri", req.RequestURI).Msgf("401 unauthorized %s", req.RequestURI)
 		res.WriteHeader(401)
 		return
 	}
+
+	log.Info().Str("uri", req.RequestURI).Msgf("receive %s", req.RequestURI)
 
 	if req.RequestURI == "/flush" {
 		if err := s.flush(); err != nil {
@@ -198,6 +202,7 @@ func (s *server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 				Message: err.Error(),
 			})
 			_, _ = res.Write(b)
+			log.Info().Str("uri", req.RequestURI).Msgf("400 invalid request: %s", req.RequestURI)
 			return
 		}
 	}
@@ -210,6 +215,7 @@ func (s *server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 			Message: "error body reading",
 		})
 		_, _ = res.Write(b)
+		log.Info().Str("uri", req.RequestURI).Msgf("400 invalid request: %s", req.RequestURI)
 		return
 	}
 	if err := s.setRecord(body, req.RequestURI); err != nil {
@@ -218,10 +224,12 @@ func (s *server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 			Message: err.Error(),
 		})
 		_, _ = res.Write(b)
+		log.Info().Str("uri", req.RequestURI).Msgf("400 invalid request: %s", req.RequestURI)
 		return
 	}
 	res.WriteHeader(200)
 	_, _ = res.Write([]byte("{}"))
+	log.Info().Str("uri", req.RequestURI).Msgf("200 accept: %s", req.RequestURI)
 }
 
 func main() {

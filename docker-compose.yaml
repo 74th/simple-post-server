@@ -1,0 +1,15 @@
+version: "3.7"
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: gcr.io/nnyn-dev/simple-post-server:latest
+    command:
+      - -client-id=test
+      - -client-secret=testtest
+      - -output=/app/test
+    ports:
+      - 8080:8080
+    volumes:
+      - /home/nnyn/ghq/github.com/74th/simple-post-server/test:/app/test

@@ -11,4 +11,5 @@ FROM debian AS app
 WORKDIR /app
 COPY --from=build-env /app/server ./
 EXPOSE 8080
-ENTRYPOINT /app/server
+ENTRYPOINT [ "/app/server" ]
+CMD []
