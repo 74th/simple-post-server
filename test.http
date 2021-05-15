@@ -1,0 +1,15 @@
+###
+POST http://127.0.0.1:8080/test
+Authorization: Basic test:testtest
+
+{"hoge": 102.4}
+###
+POST http://127.0.0.1:8080/test
+Authorization: Basic test:testtest
+
+{"hoge": 140.4, "fuga": 22}
+###
+POST http://127.0.0.1:8080/flush
+Authorization: Basic test:testtest
+
+{"hoge": 102.4}

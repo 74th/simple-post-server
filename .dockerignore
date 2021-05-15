@@ -1,0 +1,6 @@
+test/
+.vscode/
+.gitignore
+README.md
+test.http
+__debug_bin
