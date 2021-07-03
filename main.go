@@ -55,6 +55,7 @@ func (r *record) set(data []byte, path string) error {
 
 type cache struct {
 	path    string
+	output  string
 	records []record
 }
 
@@ -90,6 +91,7 @@ func (s *server) setRecord(data []byte, path string) error {
 	if newPath {
 		c := &cache{
 			path:    path,
+			output:  s.output,
 			records: []record{},
 		}
 		ca = c
@@ -122,7 +124,7 @@ func flushCache(c *cache) error {
 	if err := os.MkdirAll(c.path[1:], 0766); err != nil {
 		log.Error().Msgf("cannot create directory %s: %s", c.path[1:], err.Error())
 	}
-	filePath := path.Join("./", c.path[1:], c.records[0].t+".csv")
+	filePath := path.Join(c.output, c.path[1:], c.records[0].t+".csv")
 	f, err := os.Create(filePath)
 	if err != nil {
 		log.Error().Msgf("cannot create csv %s: %s", filePath, err.Error())
