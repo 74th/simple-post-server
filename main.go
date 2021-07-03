@@ -107,20 +107,23 @@ func flushCache(c *cache) error {
 	if len(c.records) == 0 {
 		return nil
 	}
-	keys := []string{}
+	containsKeys := []string{}
 	for _, r := range c.records {
 		for _, k := range r.keys {
-			if len(keys) == 0 {
-				keys = append(keys, k)
+			if len(containsKeys) == 0 {
+				containsKeys = append(containsKeys, k)
 			} else {
-				i := sort.SearchStrings(keys, string(k))
-				if strings.Compare(keys[i], k) != 0 {
-					keys = append(keys, k)
-					sort.Strings(keys)
+				i := sort.SearchStrings(containsKeys, string(k))
+				if strings.Compare(containsKeys[i], k) != 0 {
+					containsKeys = append(containsKeys, k)
+					sort.Strings(containsKeys)
 				}
 			}
 		}
 	}
+	keys := make([]string, len(containsKeys)+1)
+	keys[0] = "t"
+	copy(keys[1:], containsKeys)
 	if err := os.MkdirAll(c.path[1:], 0766); err != nil {
 		log.Error().Msgf("cannot create directory %s: %s", c.path[1:], err.Error())
 	}
@@ -140,13 +143,14 @@ func flushCache(c *cache) error {
 	values := make([]string, len(keys))
 	for _, r := range c.records {
 
-		for i := range values {
-			values[i] = ""
+		values[0] = r.t
+		for i := range values[1:] {
+			values[i+1] = ""
 		}
 
 		for i, k := range r.keys {
-			n := sort.SearchStrings(keys, k)
-			values[n] = fmt.Sprintf("%f", r.value[i])
+			n := sort.SearchStrings(keys[1:], k)
+			values[n+1] = fmt.Sprintf("%f", r.value[i])
 		}
 
 		if err = writer.Write(values); err != nil {
